@@ -29,7 +29,8 @@ IT23312630---ITPM-Assignment1/
 ├── playwright.config.js    # Playwright configuration
 └── package.json            # Dependencies
 
-🚀 Quick Start
+## 🚀 Quick Start
+
 
 1. Install Dependencies
 Run the following commands to set up the environment:
@@ -76,7 +77,7 @@ Internet Required: Tests require an active internet connection to access the liv
 
 First Run: The first execution may be slightly slower due to browser setup.
 
-🐛 Troubleshooting
+## 🐛 Troubleshooting
 If tests fail, please check the following:
 
 Check your internet connection.
