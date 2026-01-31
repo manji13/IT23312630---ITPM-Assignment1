@@ -104,7 +104,7 @@ The automation suite performs **37 tests** across multiple categories:
 |:--------|:------|
 | **Target Website** | https://www.swifttranslator.com/ |
 | **Default Browser** | Chromium |
-| **Test Timeout** | 30 seconds |
+| **Test Timeout** | 60 seconds |
 | **Translation Wait Time** | 2 seconds |
 | **Typing Delay (UI Tests)** | 100ms per character |
 | **Failure Handling** | Automatic screenshots for negative tests and failures |
