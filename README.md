@@ -29,11 +29,11 @@ IT23312630---ITPM-Assignment1/
 ├── playwright.config.js    # Playwright configuration
 └── package.json            # Dependencies
 
+
 ## 🚀 Quick Start
 
-
-1. Install Dependencies
-Run the following commands to set up the environment:
+### 1. Install Dependencies
+```bash
 npm install
 npx playwright install
 
