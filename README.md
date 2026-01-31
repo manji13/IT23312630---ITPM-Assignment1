@@ -21,7 +21,7 @@ This project contains an automated test suite for the [Swift Translator](https:/
 ```text
 IT23312630---ITPM-Assignment1/
 ├── tests/                  # Test files
-│   └── tests.spec.js       # Main test file (35+ tests)
+│   └── tests.spec.js       # Main test file (37 tests)
 ├── test-results/           # Test execution results
 ├── playwright-report/      # HTML reports
 ├── results/                # Screenshots and outputs
@@ -72,21 +72,29 @@ npx playwright show-report
 
 ## 🧪 Test Suite Details
 
-The automation suite performs **37 tests** across three main categories:
+The automation suite performs **37 tests** across multiple categories:
 
-| Category | Count | Description |
-|:---------|:------|:------------|
-| ✅ Positive Tests | 24 | Verify correct translations for valid Singlish inputs |
-| ⚠️ Negative Tests | 11 | Test error handling and invalid input scenarios |
-| 🎨 UI Tests | 2 | Check interface behavior and element visibility |
+| Test Type | Positive | Negative | Subtotal |
+|:----------|:---------|:---------|:---------|
+| 🔧 **Functional Tests** | 24 | 11 | **35** |
+| 🎨 **UI Tests** | 1 | 1 | **2** |
+| 📊 **Total** | **25** | **12** | **37** |
+
+### Test Categories Breakdown:
+
+- **Positive Functional Tests (24)**: Verify correct translations for valid Singlish inputs
+- **Positive UI Tests (1)**: Real-time translation behavior and interface updates
+- **Negative Functional Tests (11)**: Error handling for malformed inputs, abbreviations, URLs, and edge cases
+- **Negative UI Tests (1)**: Input field overflow and performance testing
 
 ---
 
 ## 📊 Test Results & Artifacts
 
-- **Screenshots**: Saved automatically in the `results/` folder upon failure
-- **HTML Reports**: Generated in the `playwright-report/` directory
-- **Logs**: Detailed execution logs are visible in the terminal output
+- **Screenshots**: Saved automatically in the `results/` folder for all negative tests and failures
+- **HTML Reports**: Generated in the `playwright-report/` directory with detailed execution logs
+- **Console Logs**: Detailed test execution information visible in the terminal output
+- **Test IDs**: Each test has a unique identifier (e.g., `Pos_Fun_0001`, `Neg_UI_0001`)
 
 ---
 
@@ -97,7 +105,9 @@ The automation suite performs **37 tests** across three main categories:
 | **Target Website** | https://www.swifttranslator.com/ |
 | **Default Browser** | Chromium |
 | **Test Timeout** | 30 seconds |
-| **Failure Handling** | Screenshots enabled for failed tests |
+| **Translation Wait Time** | 2 seconds |
+| **Typing Delay (UI Tests)** | 100ms per character |
+| **Failure Handling** | Automatic screenshots for negative tests and failures |
 
 ---
 
@@ -106,6 +116,8 @@ The automation suite performs **37 tests** across three main categories:
 - **Internet Required**: Tests require an active internet connection to access the live website
 - **First Run**: The first execution may be slightly slower due to browser setup
 - **Browser Support**: Tests are configured for Chromium, but can be extended to Firefox and WebKit
+- **Real-time Testing**: UI tests simulate realistic typing behavior with character-by-character input
+- **Negative Tests**: Designed to verify the system properly handles edge cases and invalid inputs
 
 ---
 
@@ -114,7 +126,7 @@ The automation suite performs **37 tests** across three main categories:
 If tests fail, please check the following:
 
 1. ✅ Check your internet connection
-2. ✅ Verify the website is accessible manually
+2. ✅ Verify the website is accessible manually at https://www.swifttranslator.com/
 3. ✅ Run with the `--headed` flag to see what is happening on screen
 4. ✅ Update Playwright dependencies:
 ```bash
@@ -123,9 +135,13 @@ npx playwright install --with-deps
 
 ### Common Issues
 
-- **Browser not found**: Run `npx playwright install`
-- **Test timeout**: Increase timeout in `playwright.config.js`
-- **Network errors**: Ensure stable internet connection
+| Issue | Solution |
+|:------|:---------|
+| **Browser not found** | Run `npx playwright install` |
+| **Test timeout** | Increase `WAIT_TIME` constant in test file |
+| **Network errors** | Ensure stable internet connection and check website availability |
+| **Screenshot issues** | Verify `results/` directory has write permissions |
+| **Translation mismatch** | Website may have updated translation logic - verify manually |
 
 ---
 
@@ -134,14 +150,26 @@ npx playwright install --with-deps
 - [Playwright Documentation](https://playwright.dev/)
 - [Swift Translator Website](https://www.swifttranslator.com/)
 - [Playwright Best Practices](https://playwright.dev/docs/best-practices)
+- [Playwright Test Assertions](https://playwright.dev/docs/test-assertions)
 
 ---
 
 ## 📄 License
 
-This project is created for academic purposes as part of IT3040 coursework.
+This project is created for academic purposes as part of IT3040 - IT Project Management coursework at SLIIT.
+
+---
+
+## 📞 Contact
+
+For questions or issues related to this project:
+
+- **Student**: H.K.M KAVISHAN
+- **Student ID**: IT23312630
+- **Course**: IT3040 - IT Project Management
 
 ---
 
 **Created by:** H.K.M KAVISHAN (IT23312630)  
-**Date:** January 2026
+**Date:** January 2026  
+**Institution:** Sri Lanka Institute of Information Technology (SLIIT)

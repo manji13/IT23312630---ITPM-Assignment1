@@ -1,4 +1,6 @@
 const { test, expect } = require('@playwright/test');
+const fs = require('fs');
+const path = require('path');
 
 // ----------------------------------------------------
 // CONFIGURATION
@@ -6,6 +8,12 @@ const { test, expect } = require('@playwright/test');
 const URL = 'https://www.swifttranslator.com/';
 const WAIT_TIME = 2000; // Time to wait for translation to appear
 const TYPING_DELAY = 100; // Delay between keystrokes for realistic typing simulation
+
+// Ensure results directory exists
+const resultsDir = path.join(__dirname, 'results');
+if (!fs.existsSync(resultsDir)) {
+  fs.mkdirSync(resultsDir, { recursive: true });
+}
 
 // ----------------------------------------------------
 // POSITIVE FUNCTIONAL TEST CASES
@@ -251,42 +259,35 @@ test.describe('SwiftTranslator – Negative Functional Tests', () => {
       // 4. Get actual output
       const actualOutput = await getOutputText(page);
       
-      // 5. VERIFICATION - Negative test: expect NOT to match exactly
-      // Option 1: Check if expected text is NOT visible (or contains errors)
-      const expectedElement = page.getByText(tc.expected).first();
-      const isExpectedVisible = await expectedElement.isVisible().catch(() => false);
+      console.log(`\n=== Negative Test ${tc.id} ===`);
+      console.log(`Input: ${tc.input}`);
+      console.log(`Expected (should NOT match): ${tc.expected}`);
+      console.log(`Actual: ${actualOutput}`);
       
-      // For negative tests, we expect the system to FAIL
-      // So the expected correct output should NOT be visible
-      // OR the actual output should be different from expected
-      
-      if (isExpectedVisible) {
-        // If the system correctly handles the negative case (which it shouldn't),
-        // then our negative test "fails" (meaning the system is better than expected)
-        console.log(`WARNING: Negative test ${tc.id} passed - system handled it correctly`);
-        console.log(`Expected failure but got: ${actualOutput}`);
-      } else {
-        // This is what we expect for negative tests - system fails to produce correct output
-        console.log(`Negative test ${tc.id} behaving as expected (system failed)`);
-        console.log(`Expected: ${tc.expected}`);
-        console.log(`Actual: ${actualOutput}`);
+      try {
+        // 5. NEGATIVE ASSERTION: Output should NOT match expected
+        // This test PASSES when the translation is wrong
+        expect(actualOutput).not.toBe(tc.expected);
         
-        // We can assert that the output is NOT correct
-        // Check for common error patterns in the actual output
-        const hasNumbersAsText = tc.input.match(/[0-9]/) && actualOutput.includes(tc.input.match(/[0-9]/)[0]);
-        const hasLiteralTransliteration = actualOutput.includes('@') || actualOutput.includes('http');
+        console.log(`✅ NEGATIVE TEST PASSED: System failed as expected`);
         
-        if (actualOutput && actualOutput !== '') {
-          // Output exists but is wrong - this is the expected failure
-          expect(actualOutput).not.toBe(tc.expected);
-        } else {
-          // No output or empty output - also a failure scenario
-          console.log('No output generated for negative test case');
-        }
+        // Take screenshot for documentation (even when test passes)
+        await page.screenshot({ 
+          path: path.join(resultsDir, `neg-test-${tc.id}.png`),
+          fullPage: true 
+        });
+        
+      } catch (error) {
+        console.log(`❌ NEGATIVE TEST FAILED: System handled it correctly (unexpected!)`);
+        
+        // Take screenshot on failure
+        await page.screenshot({ 
+          path: path.join(resultsDir, `neg-test-FAILED-${tc.id}.png`),
+          fullPage: true 
+        });
+        
+        throw error;
       }
-      
-      // 6. Take screenshot for documentation
-      await page.screenshot({ path: `results/neg-test-${tc.id}.png` });
     });
   }
 });
@@ -305,54 +306,78 @@ test.describe('SwiftTranslator – Negative UI Tests', () => {
       
       // 2. Check initial state
       const initialHeight = await inputField.evaluate(el => el.clientHeight);
+      const initialScrollHeight = await inputField.evaluate(el => el.scrollHeight);
+      
+      console.log(`\n=== Negative UI Test ${tc.id} ===`);
+      console.log(`Description: ${tc.description}`);
+      console.log(`Input length: ${tc.input.length} characters`);
+      console.log(`Initial height: ${initialHeight}px`);
+      console.log(`Initial scroll height: ${initialScrollHeight}px`);
       
       // 3. Enter very long text
       await inputField.fill('');
       await inputField.fill(tc.input);
       await page.waitForTimeout(WAIT_TIME);
       
-      // 4. Check for UI issues - negative test: expect problems
+      // 4. Check final state
       const finalHeight = await inputField.evaluate(el => el.clientHeight);
-      const hasVerticalScroll = await inputField.evaluate(el => el.scrollHeight > el.clientHeight);
+      const finalScrollHeight = await inputField.evaluate(el => el.scrollHeight);
+      const hasVerticalScroll = finalScrollHeight > finalHeight;
       
-      console.log(`Negative UI test ${tc.id}:`);
-      console.log(`Height: ${initialHeight} -> ${finalHeight}`);
-      console.log(`Scroll needed: ${hasVerticalScroll}`);
+      console.log(`Final height: ${finalHeight}px`);
+      console.log(`Final scroll height: ${finalScrollHeight}px`);
+      console.log(`Vertical scroll needed: ${hasVerticalScroll}`);
       
-      // 5. VERIFICATION - Negative UI test: we expect issues
-      // The textarea should expand or show scrollbars for very long text
-      // If it doesn't, that might indicate text is being cut off
+      // 5. Take screenshot BEFORE any assertions (to capture the state)
+      await page.screenshot({ 
+        path: path.join(resultsDir, `neg-ui-${tc.id}.png`),
+        fullPage: true 
+      });
       
-      // For very long input, we expect either:
-      // 1. Textarea expands significantly OR
-      // 2. Scrollbars appear OR
-      // 3. Text is truncated/cut off
-      
-      const isHeightExpanded = finalHeight > initialHeight * 2;
-      const hasUIProblem = isHeightExpanded || hasVerticalScroll;
-      
-      // We expect UI problems with very long input
-      if (!hasUIProblem) {
-        console.log('WARNING: No UI issues detected - text might be truncated');
-      } else {
-        console.log('UI issue detected as expected for negative test');
+      try {
+        // 6. Basic UI checks
+        // Input field should still be visible and enabled
+        await expect(inputField).toBeVisible();
+        await expect(inputField).toBeEnabled();
+        
+        // 7. For negative UI test, we're mainly documenting the behavior
+        // We expect SOME change with very long input
+        const heightChanged = finalHeight !== initialHeight;
+        const scrollbarAppeared = hasVerticalScroll;
+        
+        console.log(`Height changed: ${heightChanged}`);
+        console.log(`Scrollbar appeared: ${scrollbarAppeared}`);
+        
+        if (!heightChanged && !scrollbarAppeared) {
+          console.log(`⚠️  Warning: No visible UI change with very long input`);
+        }
+        
+        // 8. Check performance
+        const startTime = Date.now();
+        await inputField.fill('test'); // Clear and type something short
+        await page.waitForTimeout(500);
+        const endTime = Date.now();
+        const responseTime = endTime - startTime;
+        
+        console.log(`Response time after long input: ${responseTime}ms`);
+        
+        if (responseTime > 2000) {
+          console.log(`⚠️  Performance warning: Slow response (${responseTime}ms)`);
+        }
+        
+        console.log(`✅ NEGATIVE UI TEST COMPLETED`);
+        
+      } catch (error) {
+        console.log(`❌ NEGATIVE UI TEST FAILED: ${error.message}`);
+        
+        // Take another screenshot on failure
+        await page.screenshot({ 
+          path: path.join(resultsDir, `neg-ui-FAILED-${tc.id}.png`),
+          fullPage: true 
+        });
+        
+        throw error;
       }
-      
-      // 6. Check performance - long input might cause lag
-      const startTime = Date.now();
-      await inputField.fill('test'); // Try to type something else
-      await page.waitForTimeout(500);
-      const endTime = Date.now();
-      const responseTime = endTime - startTime;
-      
-      console.log(`Response time after long input: ${responseTime}ms`);
-      
-      if (responseTime > 1000) {
-        console.log('Performance issue detected - slow response after long input');
-      }
-      
-      // 7. Take screenshot for documentation
-      await page.screenshot({ path: `results/neg-ui-${tc.id}.png` });
     });
   }
 });
