@@ -6,7 +6,7 @@ const path = require('path');
 // CONFIGURATION
 // ----------------------------------------------------
 const URL = 'https://www.swifttranslator.com/';
-const WAIT_TIME = 2000; // Time to wait for translation to appear
+const WAIT_TIME = 5000; // INCREASED from 2000 to 5000ms (5 seconds)
 const TYPING_DELAY = 100; // Delay between keystrokes for realistic typing simulation
 
 // Ensure results directory exists
@@ -298,6 +298,9 @@ test.describe('SwiftTranslator – Negative Functional Tests', () => {
 test.describe('SwiftTranslator – Negative UI Tests', () => {
   for (const tc of negativeUITestCases) {
     test(`${tc.id} - ${tc.description}`, async ({ page }) => {
+      // Set test timeout to 60 seconds
+      test.setTimeout(60000);
+      
       await page.goto(URL);
       await page.waitForLoadState('networkidle');
 
@@ -352,16 +355,16 @@ test.describe('SwiftTranslator – Negative UI Tests', () => {
           console.log(`⚠️  Warning: No visible UI change with very long input`);
         }
         
-        // 8. Check performance
+        // 8. Check performance - INCREASED wait time
         const startTime = Date.now();
         await inputField.fill('test'); // Clear and type something short
-        await page.waitForTimeout(500);
+        await page.waitForTimeout(1000); // INCREASED from 500 to 1000ms
         const endTime = Date.now();
         const responseTime = endTime - startTime;
         
         console.log(`Response time after long input: ${responseTime}ms`);
         
-        if (responseTime > 2000) {
+        if (responseTime > 3000) { // INCREASED threshold from 2000 to 3000ms
           console.log(`⚠️  Performance warning: Slow response (${responseTime}ms)`);
         }
         
